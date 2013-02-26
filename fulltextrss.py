@@ -16,6 +16,8 @@ class ParseFlux():
 		new_texte = ''
 		m1 = "<script"
 		m2 = "</script>"
+		if texte.find(m1) == -1:
+			return texte
 		while texte.find(m1) != -1:
 			p1 = texte.find(m1)
 			p2 = texte.find(m2) + len(m2)
