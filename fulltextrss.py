@@ -11,6 +11,7 @@ class ParseFlux():
 	
 	browser = Browser()
 	q = Queue.Queue(0)
+	cache_db = {}
 	
 	def delete_script(self, texte):
 		new_texte = ''
@@ -56,12 +57,15 @@ class ParseFlux():
 	def main(self, url):
 		page, links = self.parse_flux(url)
 		for i in links :
-			self.dl_page(i)
+			if i not in self.cache_db:
+				self.dl_page(i)
 		while threading.activeCount() != 1:
 			sleep(0.05)
 		while self.q.empty() == False:
 			n = self.q.get()
-			page = self.update(page, n[0], n[1])
+			self.cache_db[n[0]] = n[1]
+		for i in links :
+			page = self.update(page, i, self.cache_db[i])
 		return	page
 	
 class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
