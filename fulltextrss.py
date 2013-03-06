@@ -6,6 +6,8 @@ from Browser import Browser
 from xml.dom.minidom import parseString
 import threading
 import Queue
+from time import sleep
+import urllib
 
 class ParseFlux():
 	
@@ -27,7 +29,7 @@ class ParseFlux():
 			texte = new_texte
 		return new_texte
 	
-	def update(self, page, link, new_data):
+	def update(self, page, link, new_data, start, end):
 		# remplace la "Description" correspondant au "link" par new_data
 		new_page = page[ : page.find(link) + len(link)]
 		page = page[ page.find(link) + len(link) : ]
@@ -36,6 +38,16 @@ class ParseFlux():
 		new_page += "<![CDATA["
 		new_data = new_data[ new_data.find('<body') : ]
 		new_data = new_data[ : new_data.find('</body>') ]
+		if start != '':
+			if new_data.find(start) == -1:
+				print 'Avertissement : Le début "' + start + '" n''a pas été trouvé dans ' + link 
+			else : 
+				new_data = new_data[ new_data.find(start) : ]
+		if end != '':
+			if new_data.find(end) == -1:
+				print 'Avertissement : La fin "' + end + '" n''a pas été trouvé dans ' + link  
+			else:
+				new_data = new_data[ : new_data.find(end) ]
 		new_page += self.delete_script(new_data).replace("]]>", "")
 		new_page += "]]>"
 		page = page[ page.find(m) + len(m) : ]
@@ -54,7 +66,7 @@ class ParseFlux():
 	def dl_page(self, url):
 		self.q.put( (url, self.browser.get(url)) )
 		
-	def main(self, url):
+	def main(self, url, start, end):
 		page, links = self.parse_flux(url)
 		for i in links :
 			if i not in self.cache_db:
@@ -67,16 +79,32 @@ class ParseFlux():
 			n = self.q.get()
 			self.cache_db[n[0]] = n[1]
 		for i in links :
-			page = self.update(page, i, self.cache_db[i])
+			if self.cache_db.get(i) != None:
+				page = self.update(page, i, self.cache_db[i], start, end)
 		return	page
 	
 class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
 	def do_GET(s):
 		p = ParseFlux()
+		start = ''
+		end = ''
 		m = "?url="
 		url = s.path[ s.path.find(m) + len(m) : ]
-		data = p.main(url)
+		m = "&start=" 
+		m2 = "&end="
+		if m in url:
+			url = url[ : url.find(m) ]
+			start = s.path[ s.path.find(m) + len(m) : ]
+			if m2 in start:
+				start = start[ : start.find(m2) ]
+		if m2 in s.path:
+			end = s.path[ s.path.find(m2) + len(m2) : ]
+		if m2 in url:
+			url = url[ : url.find(m2) ]
+		start = urllib.unquote(start)
+		end = urllib.unquote(end)
+		data = p.main(url, start, end)
 		s.send_response(200)
 		s.send_header("Content-type", "text/html")                                   
 		s.end_headers()
