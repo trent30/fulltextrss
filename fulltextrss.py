@@ -42,7 +42,7 @@ class ParseFlux():
 			if new_data.find(start) == -1:
 				print 'Avertissement : Le début "' + start + '" n''a pas été trouvé dans ' + link 
 			else : 
-				new_data = new_data[ new_data.find(start) : ]
+				new_data = new_data[ new_data.find(start) + len(start) : ]
 		if end != '':
 			if new_data.find(end) == -1:
 				print 'Avertissement : La fin "' + end + '" n''a pas été trouvé dans ' + link  
