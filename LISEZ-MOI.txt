@@ -1,9 +1,25 @@
 fulltextrss est un proxy permettant de récupérer entièrement les flux RSS.
 
-Pour l'utiliser il suffit de rajouter dans votre agrégateur habituel "http://127.0.0.1:8001/?urls=" devant l'url classique du flux RSS.
+Pour l'utiliser il suffit de rajouter dans votre agrégateur habituel "http://127.0.0.1:8001/?url=" devant l'url classique du flux RSS.
 
 Exemple pour http://www.site.com/feed/:
-http://127.0.0.1:8001/?urls=http://www.site.com/feed/
+http://127.0.0.1:8001/?url=http://www.site.com/feed/
 
-Fonctionnement:
-Quand une requête arrive, le flux RSS est téléchargé, puis, pour chaque article contenu dans le flux RSS, la page web correspondante est téléchargée et le contenu "body" de la page remplace le contenu tronqué du flux RSS incomplet. Malgré le multithreading, télécharger 10, 15 ou 20 pages peut prendre un certain temps, par conséquent il se peut que vous soyez obligé d'augmenter le timeout de votre agrégateur.
+
+	Fonctionnement:
+	
+Quand une requête arrive, le flux RSS est téléchargé, puis, pour chaque article contenu dans le flux RSS, la page web correspondante est téléchargée et le contenu "body" de la page remplace le contenu tronqué du flux RSS incomplet.
+
+
+	Optimisation:
+	
+Les pages téléchargées peuvent être beaucoup plus lourdes que le texte désiré (menus, commentaires, pub, etc) et on peut avoir envie de supprimer tous les éléments que l'on considère comme inutiles. Pour cela vous pouvez ajouter les paramètres &start et &end dans l'url du flux.
+
+Exemple :
+http://127.0.0.1:8001/?url=http://www.site.com/feed/&start=title="&end=About%20these%20ads
+
+Tout ce qui se trouve avant title=" sera supprimé.
+Tout ce qui se trouve après About%20these%20ads sera supprimé.
+
+Note : il faut remplacer les espaces par des %20
+
