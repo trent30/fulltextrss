@@ -58,7 +58,9 @@ class ParseFlux():
 		page, links = self.parse_flux(url)
 		for i in links :
 			if i not in self.cache_db:
-				self.dl_page(i)
+				th=threading.Thread(target = self.dl_page, args=(i,))
+				th.setDaemon(True)
+				th.start()
 		while threading.activeCount() != 1:
 			sleep(0.05)
 		while self.q.empty() == False:
