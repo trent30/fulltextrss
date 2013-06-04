@@ -58,7 +58,10 @@ class ParseFlux():
 	def parse_flux(self, url):
 		page = self.browser.get(url)
 		links = []
-		dom = parseString(page)
+		try:
+			dom = parseString(page)
+		except:
+			return page, links
 		for node in dom.getElementsByTagName('item'):
 			links.append( node.getElementsByTagName("link")[0].toxml().encode('utf8').replace("<link>", "").replace("</link>", "") )
 		return page, links
