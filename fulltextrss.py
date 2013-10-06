@@ -8,6 +8,7 @@ import threading
 import Queue
 from time import sleep
 import urllib
+from dtc import dtc
 
 class ParseFlux():
 	
@@ -107,7 +108,12 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 			url = url[ : url.find(m2) ]
 		start = urllib.unquote(start)
 		end = urllib.unquote(end)
-		data = p.main(url, start, end)
+		#hook
+		if url == "http://danstonchat.com/rss.xml":
+			d = dtc()
+			data = d.run(url)
+		else:
+			data = p.main(url, start, end)
 		s.send_response(200)
 		s.send_header("Content-type", "text/html")                                   
 		s.end_headers()
