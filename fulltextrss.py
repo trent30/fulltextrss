@@ -32,13 +32,6 @@ class ParseFlux():
 	
 	def update(self, page, link, new_data, start, end):
 		# remplace la "Description" correspondant au "link" par new_data
-		new_page = page[ : page.find(link) + len(link)]
-		page = page[ page.find(link) + len(link) : ]
-		m = "<description>"
-		new_page += page[ : page.find(m) + len(m)]
-		new_page += "<![CDATA["
-		new_data = new_data[ new_data.find('<body') : ]
-		new_data = new_data[ : new_data.find('</body>') ]
 		if start != '':
 			if new_data.find(start) == -1:
 				print 'Avertissement : Le début "' + start + '" n''a pas été trouvé dans ' + link 
@@ -49,12 +42,15 @@ class ParseFlux():
 				print 'Avertissement : La fin "' + end + '" n''a pas été trouvé dans ' + link  
 			else:
 				new_data = new_data[ : new_data.find(end) ]
-		new_page += self.delete_script(new_data).replace("]]>", "")
-		new_page += "]]>"
-		page = page[ page.find(m) + len(m) : ]
-		m = "</description>"
-		new_page += page[ page.find(m) :]
-		return new_page
+		try:
+			dom = parseString(page)
+		except:
+			return page
+		
+		for node in dom.getElementsByTagName('item'):
+			if node.getElementsByTagName('link')[0].childNodes[0].data == link:
+				node.getElementsByTagName('description')[0].childNodes[0].data = new_data
+		return dom.toxml('utf-8')
 	
 	def parse_flux(self, url):
 		page = self.browser.get(url)
@@ -64,7 +60,7 @@ class ParseFlux():
 		except:
 			return page, links
 		for node in dom.getElementsByTagName('item'):
-			links.append( node.getElementsByTagName("link")[0].toxml().encode('utf8').replace("<link>", "").replace("</link>", "") )
+			links.append( node.getElementsByTagName("link")[0].childNodes[0].data)
 		return page, links
 	
 	def dl_page(self, url):
