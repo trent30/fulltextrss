@@ -42,6 +42,7 @@ class ParseFlux():
 				print 'Avertissement : La fin "' + end + '" n''a pas été trouvé dans ' + link  
 			else:
 				new_data = new_data[ : new_data.find(end) ]
+		new_data = new_data.replace(']]>', '').decode('utf8')
 		try:
 			dom = parseString(page)
 		except:
@@ -54,6 +55,7 @@ class ParseFlux():
 	
 	def parse_flux(self, url):
 		page = self.browser.get(url)
+		page = page.replace('<description></description>','<description> </description>')
 		links = []
 		try:
 			dom = parseString(page)
